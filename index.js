@@ -1,6 +1,6 @@
 "use strict"
 
-class FrameSock {
+class FSock {
   #tlsSock
   #frameSize
   #frameDataSize
@@ -96,4 +96,4 @@ class FrameSock {
   get frameDataSize () {return this.#frameDataSize}
 }
 
-module.exports = FrameSock
+module.exports = FSock
