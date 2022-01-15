@@ -1,99 +1,58 @@
 "use strict"
 
-class FSock {
+module.exports = class FSock {
   #tlsSock
-  #frameSize
-  #frameDataSize
   #buf
-  onData
-  onError
+  ondata
+  onerror
 
-  constructor (tlsSock, frameSize = 512) {
+  constructor (tlsSock) {
     this.#tlsSock       = tlsSock
-    this.#frameSize     = frameSize
-    this.#frameDataSize = this.frameSize - 4
     this.#buf           = Buffer.alloc(0)
-
-    if (frameSize < 64 || frameSize > 65535)
-      throw `invalid frame size of ${frameSize}, must be in range 64-65535, ` +
-            "inclusive. if unsure, use 512."
 
     this.#tlsSock.on ("data", (packet) => {
       this.#bufAppend(packet)
 
-      while (this.#buf.length >= this.frameSize) {
-        const frame = this.#bufTop()
-        const code  = frame.readUInt16BE(0)
-        const len   = frame.readUInt16BE(2)
-
-        if (len > this.frameDataSize) {
-          this.#error (
-            `received frame data overflow: ${len} ` +
-            `==X=> ${this.frameDataSize}`
-          )
-          return
-        }
+      while (this.#buf.length > 4) {
+        const len = this.#buf.readUInt32BE(0)
+        if (this.#buf.length < packet.length) break
         
-        const data = frame.slice(4, len + 4)
-        this.onData(code, data)
+        const frame = this.#bufTop(len)
+        const data = frame.slice(4)
+        this.ondata(data)
 
-        this.#bufPop()
+        this.#bufPop(len)
       }
     })
   }
 
+  /* on (eventName, callback)
+     assigns an event handler callback to an event name. if the event name is
+     not data or error, it is directly assigned to the underlying socket. */
   on (eventName, callback) {
     switch (eventName) {
-      case "data":
-        // should be in the form of:
-        // function (code, data) {}
-        this.onData = callback
-        break
-
-      case "error":
-        this.onError = callback
-        this.#tlsSock.on("error", callback)
-        break
-      
-      default:
-        this.#tlsSock.on(eventName, callback)
-        break
+      case "data":  this.ondata  = callback; break
+      case "error": this.onerror = callback
+      default:      this.#tlsSock.on(eventName, callback)
     }
   }
 
-  write (code, buf) {
-    if (buf.length > this.frameDataSize)
-      throw `frame overflow: ${buf.length} ==X=> ${this.frameDataSize}`
-
-    let newbuf = Buffer.alloc(this.frameSize)
-    newbuf.writeUInt16BE(code, 0)       // frame code (dev defined)
-    newbuf.writeUInt16BE(buf.length, 2) // data size
-
-    buf.copy(newbuf, 4)
-    this.#tlsSock.write(newbuf)
+  /* write (...fragments)
+     takes in any number of Buffer objects and sends them in a single frame */
+  write (...fragments) {
+    let outgoing = Buffer.concat([Buffer.alloc(4), ...fragments])
+    outgoing.writeUInt32BE(outgoing.length, 0)
+    this.#tlsSock.write(outgoing)
   }
 
   #error (err) {
-    if (this.onError)
-      this.onError(err)
+    if (this.onerror)
+      this.onerror(err)
     else
       throw err
   }
 
-  #bufAppend (data) {
-    this.#buf = Buffer.concat([this.#buf, data])
-  }
-
-  #bufTop () {
-    return this.#buf.slice(0, this.frameSize)
-  }
-
-  #bufPop () {
-    this.#buf = this.#buf.slice(this.frameSize)
-  }
-
-  get frameSize     () {return this.#frameSize}
-  get frameDataSize () {return this.#frameDataSize}
+  #bufAppend (data) {this.#buf = Buffer.concat([this.#buf, data])}
+  #bufPop    (len)  {this.#buf = this.#buf.slice(len)}
+  #bufTop    (len)  {return this.#buf.slice(0, len)}
 }
-
-module.exports = FSock
