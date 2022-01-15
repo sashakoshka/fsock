@@ -21,7 +21,7 @@ FSock object. Then, set up data and error events:
 ```
 const sock = net.createConnection ({
   port: 4096
-}, () =>{
+}, () => {
   let fsock = new FSock(sock)
 
   fsock.on ("data" (data) => {

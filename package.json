@@ -23,5 +23,8 @@
   "bugs": {
     "url": "https://github.com/sashakoshka/fsock/issues"
   },
-  "homepage": "https://github.com/sashakoshka/fsock#readme"
+  "homepage": "https://github.com/sashakoshka/fsock#readme",
+  "files": [
+    "index.js"
+  ]
 }

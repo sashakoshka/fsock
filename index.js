@@ -18,12 +18,8 @@ module.exports = class FSock {
         const len = this.#buf.readUInt32BE(0)
         if (this.#buf.length < packet.length) break
 
-        // extract data and give it to event handler
-        const frame = this.#buf.slice(0, len)
-        const data  = frame.slice(4)
-        this.ondata(data)
-
-        // remove data we read from buffer
+        // extract data, give it to event handler, and remove it from buffer
+        this.ondata(this.#buf.slice(4, len))
         this.#buf = this.#buf.slice(len)
       }
     })

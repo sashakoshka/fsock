@@ -64,7 +64,7 @@ let originalData = Buffer.alloc(0),
 { // set up client
   const client = net.createConnection ({
     port: 4096
-  }, () =>{
+  }, () => {
     clientLog("(i) connected to server")
     let fsock = new FSock(client)
   
