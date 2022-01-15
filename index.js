@@ -20,7 +20,7 @@ module.exports = class FSock {
 
         // extract data and give it to event handler
         const frame = this.#buf.slice(0, len)
-        const data = frame.slice(4)
+        const data  = frame.slice(4)
         this.ondata(data)
 
         // remove data we read from buffer

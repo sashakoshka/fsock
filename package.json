@@ -1,0 +1,27 @@
+{
+  "name": "@hlhv/fsock",
+  "version": "1.0.0",
+  "description": "Simple socket framing module for HLHV.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sashakoshka/fsock.git"
+  },
+  "keywords": [
+    "tcp",
+    "socket",
+    "frame"
+  ],
+  "author": "Sasha Koshka",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sashakoshka/fsock/issues"
+  },
+  "homepage": "https://github.com/sashakoshka/fsock#readme"
+}
