@@ -1,16 +1,16 @@
 "use strict"
 
 module.exports = class FSock {
-  #tlsSock
   #buf
+  tlsSock
   ondata
   onerror
 
   constructor (tlsSock) {
-    this.#tlsSock = tlsSock
-    this.#buf     = Buffer.alloc(0)
+    this.tlsSock = tlsSock
+    this.#buf    = Buffer.alloc(0)
 
-    this.#tlsSock.on ("data", (packet) => {
+    this.tlsSock.on ("data", (packet) => {
       this.#buf = Buffer.concat([this.#buf, packet])
 
       while (this.#buf.length > 4) {
@@ -32,7 +32,7 @@ module.exports = class FSock {
     switch (eventName) {
       case "data":  this.ondata  = callback; break
       case "error": this.onerror = callback
-      default:      this.#tlsSock.on(eventName, callback)
+      default:      this.tlsSock.on(eventName, callback)
     }
   }
 
@@ -41,7 +41,7 @@ module.exports = class FSock {
   write (...fragments) {
     let outgoing = Buffer.concat([Buffer.alloc(4), ...fragments])
     outgoing.writeUInt32BE(outgoing.length, 0)
-    this.#tlsSock.write(outgoing)
+    this.tlsSock.write(outgoing)
   }
 
   #error (err) {
