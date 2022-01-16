@@ -44,6 +44,10 @@ module.exports = class FSock {
     this.tlsSock.write(outgoing)
   }
 
+  /* destroy ()
+     closes the connection */
+  destroy () { this.tlsSock.destroy() }
+
   #error (err) {
     if (this.onerror)
       this.onerror(err)
