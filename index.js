@@ -32,7 +32,9 @@ module.exports = class FSock {
     switch (eventName) {
       case "data":  this.ondata  = callback; break
       case "error": this.onerror = callback
-      default:      this.tlsSock.on(eventName, callback)
+      default:      this.tlsSock.removeAllListeners(eventName)
+                    this.tlsSock.on(eventName, callback)
+                    
     }
   }
 
