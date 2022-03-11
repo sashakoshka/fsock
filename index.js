@@ -19,8 +19,8 @@ module.exports = class FSock {
         if (this.#buf.length < packet.length) break
 
         // extract data, give it to event handler, and remove it from buffer
-        this.ondata(this.#buf.slice(4, len))
-        this.#buf = this.#buf.slice(len)
+        this.ondata && this.ondata(this.#buf.slice(4, len + 4))
+        this.#buf = this.#buf.slice(len + 4)
       }
     })
   }
@@ -42,7 +42,7 @@ module.exports = class FSock {
      takes in any number of Buffer objects and sends them in a single frame */
   write (...fragments) {
     let outgoing = Buffer.concat([Buffer.alloc(4), ...fragments])
-    outgoing.writeUInt32BE(outgoing.length, 0)
+    outgoing.writeUInt32BE(outgoing.length - 4, 0)
     this.tlsSock.write(outgoing)
   }
 
